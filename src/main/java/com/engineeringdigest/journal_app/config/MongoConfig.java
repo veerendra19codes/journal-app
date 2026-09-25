@@ -3,6 +3,7 @@ package com.engineeringdigest.journal_app.config;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.engineeringdigest.journal_app.entity.UserEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
@@ -13,13 +14,15 @@ import org.springframework.data.mongodb.core.index.Index;
 public class MongoConfig {
 
     @Bean
-    public MongoClient mongoClient() {
-        return MongoClients.create("mongodb://localhost:27017");
+    public MongoClient mongoClient(@Value("${spring.data.mongodb.uri}") String mongoUri) {
+        return MongoClients.create(mongoUri);
     }
 
     @Bean
-    public MongoTemplate mongoTemplate(MongoClient mongoClient) {
-        return new MongoTemplate(mongoClient, "journaldb");
+    public MongoTemplate mongoTemplate(
+            MongoClient mongoClient,
+            @Value("${spring.data.mongodb.database}") String databaseName) {
+        return new MongoTemplate(mongoClient, databaseName);
     }
 
     @Bean
