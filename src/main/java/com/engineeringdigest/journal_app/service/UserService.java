@@ -4,6 +4,8 @@ import com.engineeringdigest.journal_app.entity.UserEntity;
 import com.engineeringdigest.journal_app.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,12 +17,16 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public void saveEntry(UserEntity userEntity) {
-        userRepository.save(userEntity );
+        userRepository.save(userEntity);
     }
 
-    public List<UserEntity> getAll() {
-        return userRepository.findAll();
+    public void saveNewUser(UserEntity userEntity) {
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userEntity.setRoles(List.of("USER"));
+        userRepository.save(userEntity);
     }
 
     public Optional<UserEntity> getById(ObjectId id) {
@@ -29,6 +35,10 @@ public class UserService {
 
     public void deleteById(ObjectId id) {
         userRepository.deleteById(id);
+    }
+
+    public void deleteByUsername(String userName) {
+        userRepository.deleteByUserName(userName);
     }
 
     public UserEntity getByUserName(String userName) {
