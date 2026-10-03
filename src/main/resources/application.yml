@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: journal-app
+  data:
+    mongodb:
+      auto-index-creation: true
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE:journaldb}
+  config:
+    import: optional:file:.env[.properties]
+
+server:
+  port: 8080
+  servlet:
+    context-path: abcd
