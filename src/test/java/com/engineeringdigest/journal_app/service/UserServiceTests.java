@@ -1,73 +1,29 @@
 package com.engineeringdigest.journal_app.service;
 
+import com.engineeringdigest.journal_app.entity.UserEntity;
 import com.engineeringdigest.journal_app.repository.UserRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-public class UserServiceTests {
+class UserServiceTests {
 
-    @Autowired
+    @InjectMocks
+    private UserService userService;
+
+    @Mock
     private UserRepository userRepository;
 
-//    before each method
     @BeforeEach
-    public void setup() {}
-
-//    before all of the methods like defining global variables
-    @BeforeAll
-    public static void init() {}
-
-    @AfterAll
-    public static void cleanup() {}
-
-    @AfterEach
-    public void tearDown() {}
-
-    @Disabled
-    @Test
-    public void userServiceTests() {
-        assertEquals(4, 1+3);
-        assertNotNull(userRepository.findByUserName("ram"));
-    }
-
-    @Disabled
-    @ParameterizedTest
-    @CsvSource({
-            "1,1,2",
-            "2,10,12",
-            "3,3,9"
-    })
-    public void testAdd(int a, int b, int expected) {
-        assertEquals(expected, a+b);
-    }
-
-    @Disabled
-    @ParameterizedTest
-    @CsvSource({
-            "ram",
-            "sham"
-    })
-    public void testFindByUserNameParameterized(String username) {
-        assertNotNull(userRepository.findByUserName(username), "Failed for username: " + username);
-    }
-
-    @Disabled
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "ram",
-            "sham"
-    })
-    public void testFindByUserNameValueSource(String username) {
-        assertNotNull(userRepository.findByUserName(username), "Failed for username: " + username);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     enum TestUser {
@@ -76,8 +32,16 @@ public class UserServiceTests {
 
     @ParameterizedTest
     @EnumSource(TestUser.class)
-    public void testFindByUserNameEnumSource(TestUser user) {
-        assertNotNull(userRepository.findByUserName(user.name()), "Failed for username: " + user.name());
-    }
+    void getByUserNameReturnsMatchingUser(TestUser testUser) {
+        UserEntity expectedUser = UserEntity.builder()
+                .userName(testUser.name())
+                .password("password")
+                .build();
+        when(userRepository.findByUserName(testUser.name())).thenReturn(expectedUser);
 
+        UserEntity actualUser = userService.getByUserName(testUser.name());
+
+        assertSame(expectedUser, actualUser);
+        verify(userRepository).findByUserName(testUser.name());
+    }
 }
